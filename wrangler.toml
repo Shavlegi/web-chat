@@ -1,0 +1,36 @@
+# wrangler.toml — web-chat (Cloudflare Worker + D1)
+# მარტივი ვებ-ჩატი ადმინ პანელით: username + პაროლი, მეტი არაფერი.
+# იგივე დამტკიცებული მოდელი, რაც locallink-stock-ს აქვს: Worker + D1,
+# PBKDF2 პაროლის hash, ბაზაში შენახული სესიები, IP-hash rate limiting
+# (ნედლი IP არსად ინახება).
+#
+# SETUP (dashboard, ტერმინალი არ სჭირდება):
+# 1. Cloudflare dashboard -> Workers & Pages -> D1 (Storage) -> Create a
+#    database named "web-chat-db". დააკოპირე მისი database_id და ჩასვი
+#    ქვემოთ, REPLACE_WITH_YOUR_D1_DATABASE_ID-ის ადგილას.
+# 2. GitHub-ზე შექმენი ახალი საჯარო რეპო (მაგ. "web-chat") და ატვირთე
+#    ამ საქაღალდის შიგთავსი (wrangler.toml, src/, README.md).
+#    GitHub App-ს რეპოს შექმნა არ შეუძლია — ეს ნაბიჯი შენია.
+# 3. Workers & Pages -> Create -> Connect to Git -> ეს რეპო.
+#    Worker-ის სახელი ქვემოთ ("web-chat") ხდება
+#    web-chat.<ანგარიში>.workers.dev.
+# 4. Worker -> Settings -> Variables and Secrets-ში დაამატე:
+#      SESSION_SECRET — გრძელი შემთხვევითი სტრიქონი.
+#    (ადმინის პაროლი ცალკე არ არის: პირველი დარეგისტრირებული
+#    მომხმარებელი ავტომატურად ადმინი ხდება. სხვა საიდუმლო არ არის.)
+#    ნამდვილი მნიშვნელობა არასდროს ჩაწერო ჩატში ან რეპოში.
+# 5. Deploy. Worker-ი პირველივე მოთხოვნაზე თვითონ ქმნის D1 ცხრილებს
+#    (lazy idempotent სქემა) — მიგრაციების გაშვება არ სჭირდება.
+# 6. გახსენი https://web-chat.<ანგარიში>.workers.dev — დარეგისტრირდი
+#    პირველი (შენ ადმინი გახდები), მერე სხვებიც დარეგისტრირდებიან.
+
+name = "web-chat"
+main = "src/index.js"
+compatibility_date = "2025-11-01"
+
+# D1 database binding. `binding` უნდა დარჩეს "CHAT_DB" — Worker-ის კოდი
+# env.CHAT_DB-ს კითხულობს.
+[[d1_databases]]
+binding = "CHAT_DB"
+database_name = "web-chat-db"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
